@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecosystem — MOSAIC</title>
+  <meta name="description" content="The MOSAIC ecosystem: where coordination happens, and what's coming next." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- ============ Member information cards (scoped to this page) ============ -->
+  <style>
+    .mcard-carousel {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .mcard-track {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 6px 2px 16px;
+    }
+    .mcard-track::-webkit-scrollbar { height: 8px; }
+    .mcard-track::-webkit-scrollbar-track { background: transparent; }
+    .mcard-track::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .mcard-track { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+    /* vertical card — ~2:4 (1:2) width-to-height ratio */
+    .mcard {
+      scroll-snap-align: start;
+      flex: 0 0 262px;
+      width: 262px;
+      min-height: 524px;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 24px 22px;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow .18s, transform .18s, border-color .18s;
+    }
+    .mcard:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+      border-color: #c8d2dc;
+      text-decoration: none;
+    }
+    .mcard-name {
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 1.02rem;
+      line-height: 1.3;
+      min-height: 2.6em;
+      text-align: center;
+    }
+    .mcard-logo {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 16px 0 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .mcard-logo img { max-height: 62px; max-width: 100%; width: auto; object-fit: contain; }
+    .mcard-logo img[src$="AIX.png"] { border-radius: 6px; }
+    .mcard-url {
+      font-family: var(--font-mono);
+      font-size: .76rem;
+      color: var(--teal);
+      word-break: break-word;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .mcard-url svg { width: 13px; height: 13px; fill: currentColor; flex: none; }
+    .mcard:hover .mcard-url { color: var(--teal-600); }
+    .mcard-content { color: var(--muted); font-size: .9rem; line-height: 1.58; }
+
+    /* arrows */
+    .mc-arrow {
+      flex: 0 0 auto;
+      align-self: center;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--navy);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: background .15s, border-color .15s, color .15s, transform .1s, box-shadow .15s;
+    }
+    .mc-arrow:hover {
+      background: var(--bg-soft);
+      border-color: var(--faint);
+      color: var(--teal);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .mc-arrow:active { transform: translateY(0); }
+    .mc-arrow svg { width: 22px; height: 22px; fill: currentColor; }
+
+    @media (max-width: 760px) {
+      .mcard-carousel { gap: 8px; }
+      .mc-arrow { display: none; }  /* touch users swipe the row instead */
+      .mcard { flex-basis: 82vw; width: 82vw; min-height: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ SHARED HEADER ============ -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="MOSAIC logo" />
+        <span>
+          <span class="brand-name">MOSAIC</span>
+          <span class="brand-sub">Multi-Organization Secure AI Coordination</span>
+        </span>
+      </a>
+      <button class="hamburger" aria-label="Toggle navigation" onclick="document.getElementById('nav').classList.toggle('open')">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </button>
+      <nav class="nav" id="nav">
+        <a href="index.html">Home</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="team.html">Team</a>
+        <a href="news.html">News</a>
+        <a href="collab.html" class="active">Ecosystem</a>
+        <a class="gh-btn" href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub<span class="stars" id="gh-stars">★ 1.2k</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ PAGE HEAD ============ -->
+  <div class="page-head">
+    <div class="wrap">
+      <div class="breadcrumb"><a href="index.html">Home</a> / Ecosystem</div>
+      <h1>Ecosystem</h1>
+      <p>
+        MOSAIC coordinates in the open on the OWASP Foundation GitHub. Everything — discussions,
+        the initiative map, and shared definitions — is built and tracked there.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ GITHUB CTA ============ -->
+  <section class="section" style="padding-bottom:24px;">
+    <div class="wrap">
+      <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+        <div style="max-width:560px;">
+          <h3 style="margin-bottom:8px;">The coordination repository</h3>
+          <p>The central home for MOSAIC: discussions, initiative cards, and shared work — under OWASP's governance principles of openness, fairness, and integrity.</p>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          github.com/OWASP/MOSAIC
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MEMBER INFORMATION CARDS ============ -->
+  <section class="section" style="padding-top:24px; padding-bottom:24px;">
+    <div class="wrap">
+      <div class="section-head" style="max-width:none;">
+        <div class="eyebrow">Member Information Cards</div>
+        <h3>What each member brings to the table.</h3>
+        <p class="lede" style="margin-top:14px; max-width:none;">The guidance, frameworks, and training each founding initiative contributes.</p>
+      </div>
+
+      <div class="mcard-carousel">
+        <button class="mc-arrow" id="mcPrev" aria-label="Scroll left">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+
+        <div class="mcard-track" id="mcardTrack">
+
+          <a class="mcard" href="https://owaspai.org/" target="_blank" rel="noopener">
+            <div class="mcard-name">OWASP AI Exchange</div>
+            <div class="mcard-logo"><img src="assets/members/AIX.png" alt="OWASP AI Exchange (AIX)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>owaspai.org</span>
+            <div class="mcard-content">OWASP AI Exchange provides 300+ pages of free, evolving, practitioner-focused guidance for securing AI systems, including AI threats, controls, risk analysis, privacy, testing, and development/runtime security. It is an open-source global collaboration that connects AI-security experts, industry, researchers, and policymakers to help shape standards and align with frameworks such as the EU AI Act and ISO standards.</div>
+          </a>
+
+          <a class="mcard" href="https://www.sans.org/" target="_blank" rel="noopener">
+            <div class="mcard-name">SANS Institute</div>
+            <div class="mcard-logo"><img src="assets/members/SANS.svg" alt="SANS Institute (SANS)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>sans.org</span>
+            <div class="mcard-content">SANS provides hands-on AI security training, including courses on securing GenAI/LLM applications, AI/ML for cybersecurity, cloud AI security, and related GIAC certifications such as GAIPS and GMLE. It also offers practitioner resources — webinars, research, tools, and maturity/governance guidance — to help teams defend AI systems and use AI responsibly in security operations, incident response, and threat detection.</div>
+          </a>
+
+          <a class="mcard" href="https://genai.owasp.org/" target="_blank" rel="noopener">
+            <div class="mcard-name">OWASP GenAI Security Project</div>
+            <div class="mcard-logo"><img src="assets/members/GenAIP.png" alt="OWASP GenAI Security Project (GenAIP)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>genai.owasp.org</span>
+            <div class="mcard-content">OWASP GenAI LLM Top 10 2026, OWASP Top 10 for Agentic Applications for 2026, OWASP GenAI Data Security Risks &amp; Mitigations 2026, OWASP AIBOM Generator.</div>
+          </a>
+
+          <a class="mcard" href="https://berryvilleiml.com/" target="_blank" rel="noopener">
+            <div class="mcard-name">Berryville Institute of Machine Learning</div>
+            <div class="mcard-logo"><img src="assets/members/BIML.png" alt="Berryville Institute of Machine Learning (BIML)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>berryvilleiml.com</span>
+            <div class="mcard-content">BIML is a non-profit science and technology organization whose research focuses on machine learning security.</div>
+          </a>
+
+          <a class="mcard" href="https://www.cisecurity.org/" target="_blank" rel="noopener">
+            <div class="mcard-name">Center for Internet Security</div>
+            <div class="mcard-logo"><img src="assets/members/CIS.svg" alt="Center for Internet Security (CIS)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>cisecurity.org</span>
+            <div class="mcard-content">CIS Hardened Images, CIS Controls, CIS Benchmarks, CIS SecureSuite.</div>
+          </a>
+
+          <a class="mcard" href="https://cloudsecurityalliance.org/" target="_blank" rel="noopener">
+            <div class="mcard-name">Cloud Security Alliance</div>
+            <div class="mcard-logo"><img src="assets/members/CSA.svg" alt="Cloud Security Alliance (CSA)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>cloudsecurityalliance.org</span>
+            <div class="mcard-content">CSA Research is created by the industry for the industry and is both vendor-neutral and consensus driven. CSA Working Groups are the go-to source for best practices, research and tools for providing security assurance and privacy in the cloud.</div>
+          </a>
+
+          <a class="mcard" href="https://www.coalitionforsecureai.org/" target="_blank" rel="noopener">
+            <div class="mcard-name">Coalition for Secure AI</div>
+            <div class="mcard-logo"><img src="assets/members/CoSAI.png" alt="Coalition for Secure AI (CoSAI)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>coalitionforsecureai.org</span>
+            <div class="mcard-content">The Coalition for Secure AI (CoSAI) is an open ecosystem of AI and security experts from industry leading organizations. CoSAI workstreams: Software Supply Chain Security for AI Systems, AI Security Risk Governance, Secure Design Patterns for Agentic Systems.</div>
+          </a>
+
+          <a class="mcard" href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noopener">
+            <div class="mcard-name">National Institute of Standards and Technology</div>
+            <div class="mcard-logo"><img src="assets/members/NIST.png" alt="National Institute of Standards and Technology (NIST)" /></div>
+            <span class="mcard-url"><svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>nist.gov/itl/ai-risk-management-framework</span>
+            <div class="mcard-content">The NIST AI Risk Management Framework (AI RMF) is intended for voluntary use and to improve the ability to incorporate trustworthiness considerations into the design, development, use, and evaluation of AI products, services, and systems.</div>
+          </a>
+
+        </div>
+
+        <button class="mc-arrow" id="mcNext" aria-label="Scroll right">
+          <svg viewBox="0 0 24 24"><path d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLACEHOLDER CARDS ============ -->
+  <section class="section" style="padding-top:24px;">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">More to come</div>
+        <h3>Coordination, as it grows.</h3>
+        <p class="lede" style="margin-top:14px;">These surfaces are planned as MOSAIC matures. Placeholders for now — links will go live as each piece ships.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0f7d86" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Slack</h3>
+          <p>A space for real-time coordination between participating initiatives.</p>
+        </div>
+        <div class="card eco-card is-live">
+          <span class="soon">Live</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></div>
+          <h3>Roadmap</h3>
+          <p>The current alignment activities, Milestone 1, and beyond. <a href="roadmap.html">View it &rarr;</a></p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#5ba3d0" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <h3>Changelog</h3>
+          <p>A running record of decisions, definitions, and deliverables as they're published.</p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0a2a4e" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div>
+          <h3>Integrations</h3>
+          <p>Deep links and machine-readable formats so deliverables interoperate across initiatives.</p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0f7d86" stroke-width="2"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/></svg></div>
+          <h3>Member ecosystem</h3>
+          <p>The standardized map of participating initiatives — scope, geography, roadmaps, and deliverables.</p>
+        </div>
+        <div class="card eco-card is-live">
+          <span class="soon">Live</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <h3>Source &amp; discussions</h3>
+          <p>Everything lives in the open. <a href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">Open on GitHub &rarr;</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHARED FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="MOSAIC logo" />
+          <span>MOSAIC</span>
+        </div>
+        <div class="footer-links">
+          <a href="news.html">News</a>
+          <a href="privacy.html">Privacy</a>
+          <div class="footer-social">
+            <a href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener" aria-label="GitHub">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/company/mosaic-standards/about/" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0H12v2.2h.07c.63-1.2 2.17-2.46 4.46-2.46C21.4 7.74 23 10.06 23 14.34V24h-5v-8.5c0-2.03-.73-3.42-2.55-3.42-1.39 0-2.22.94-2.58 1.85-.14.32-.17.77-.17 1.22V24h-5s.07-14.55 0-16z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>MOSAIC — Multi-Organization Secure AI Coordination · Coordinated on the OWASP Foundation GitHub.</span>
+        <span class="license">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#8ea4bd"><path d="M12 2 2 7v6c0 5 4 9 10 11 6-2 10-6 10-11V7L12 2z"/></svg>
+          Released under the MIT License
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ Member card carousel logic ============ -->
+  <script>
+    (function () {
+      var track = document.getElementById('mcardTrack');
+      var prev = document.getElementById('mcPrev');
+      var next = document.getElementById('mcNext');
+      if (!track) return;
+
+      function step() {
+        var card = track.querySelector('.mcard');
+        var gap = 20;
+        var cardW = card ? card.getBoundingClientRect().width + gap : track.clientWidth * 0.8;
+        // scroll by whole visible pages (as many cards as fit)
+        var perView = Math.max(1, Math.floor(track.clientWidth / cardW));
+        return cardW * perView;
+      }
+      prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+      next.addEventListener('click', function () { track.scrollBy({ left:  step(), behavior: 'smooth' }); });
+
+      // dim arrows at the ends
+      function update() {
+        var maxScroll = track.scrollWidth - track.clientWidth - 2;
+        prev.style.opacity = track.scrollLeft <= 2 ? '.4' : '1';
+        next.style.opacity = track.scrollLeft >= maxScroll ? '.4' : '1';
+      }
+      track.addEventListener('scroll', update);
+      window.addEventListener('resize', update);
+      update();
+    })();
+  </script>
+
+  <script src="assets/gh-stars.js"></script>
+</body>
+</html>
