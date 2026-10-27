@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOSAIC — Multi-Organization Secure AI Coordination</title>
+  <meta name="description" content="MOSAIC is a coordination structure for initiatives working on AI security standards and guidelines — reducing fragmentation, duplication, and gaps." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- ============ Member logo grid — boxless (scoped to this page) ============ -->
+  <style>
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 56px 48px;
+      align-items: center;
+      justify-items: center;
+      padding: 20px 0 4px;
+    }
+    .logo-item {
+      position: relative;
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-grid img {
+      max-height: 56px;
+      max-width: 100%;
+      width: auto;
+      object-fit: contain;
+      opacity: .9;
+      transition: opacity .2s, transform .2s;
+    }
+    .logo-item:hover img { opacity: 1; transform: scale(1.04); }
+
+    /* custom tooltip — styled name pill on hover */
+    .logo-item::after,
+    .logo-item::before {
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 6;
+    }
+    .logo-item::after {
+      content: attr(data-name);
+      transform: translate(-50%, 5px);
+      margin-bottom: 13px;
+      white-space: nowrap;
+      background: var(--navy);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: .76rem;
+      letter-spacing: .01em;
+      padding: 7px 12px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+    }
+    .logo-item::before {
+      content: "";
+      transform: translate(-50%, 5px);
+      margin-bottom: 7px;
+      border: 6px solid transparent;
+      border-top-color: var(--navy);
+    }
+    .logo-item:hover::after,
+    .logo-item:hover::before {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* Per-logo optical balancing so the row reads evenly */
+    .logo-grid img[src$="BIML.png"]  { max-height: 67px; }
+    .logo-grid img[src$="NIST.png"]  { max-height: 38px; }
+    .logo-grid img[src$="SANS.svg"]  { max-height: 64px; }
+    .logo-grid img[src$="CoSAI.png"] { max-height: 53px; }
+    .logo-grid img[src$="AIX.png"]   { max-height: 52px; border-radius: 6px; }
+
+    @media (max-width: 900px) {
+      .logo-grid { grid-template-columns: repeat(2, 1fr); gap: 44px 36px; }
+    }
+    @media (max-width: 480px) {
+      .logo-grid { grid-template-columns: repeat(2, 1fr); gap: 36px 24px; }
+      .logo-grid img { max-height: 43px; }
+      .logo-grid img[src$="BIML.png"] { max-height: 53px; }
+      .logo-grid img[src$="SANS.svg"] { max-height: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ SHARED HEADER ============ -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="MOSAIC logo" />
+        <span>
+          <span class="brand-name">MOSAIC</span>
+          <span class="brand-sub">Multi-Organization Secure AI Coordination</span>
+        </span>
+      </a>
+      <button class="hamburger" aria-label="Toggle navigation" onclick="document.getElementById('nav').classList.toggle('open')">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </button>
+      <nav class="nav" id="nav">
+        <a href="index.html" class="active">Home</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="team.html">Team</a>
+        <a href="news.html">News</a>
+        <a href="collab.html">Ecosystem</a>
+        <a class="gh-btn" href="https://github.com/OWASP/MOSAIC/#mosaic" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub<span class="stars" id="gh-stars">★ 1.2k</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+        <div>
+          <h2>Collective coordination on <span class="accent">AI security standardization</span>.</h2>
+          <p class="lede" style="max-width: 100%;">
+            MOSAIC is a coordination structure for the initiatives writing AI
+            security standards and guidelines — reducing inconsistency, duplicate work,
+            and gaps, so practitioners get a clear path forward instead of ten conflicting answers.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="https://github.com/OWASP/MOSAIC/#mosaic" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              Content on GitHub
+            </a>
+			<a class="btn btn-primary" href="https://github.com/OWASP/MOSAIC/discussions" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              Discussions on GitHub
+            </a>
+            <a class="btn btn-secondary" href="roadmap.html">
+              Read the roadmap
+              <svg viewBox="0 0 24 24"><path d="M5 12h12.17l-5.59 5.59L13 19l8-8-8-8-1.42 1.41L17.17 10H5z"/></svg>
+            </a>
+          </div>
+          <div class="badges">
+            <span class="badge badge--green"><span class="dot"></span>Launched April 2026</span>
+            <span class="badge badge--teal"><span class="dot"></span>8 founding initiatives</span>
+            <span class="badge badge--navy"><span class="dot"></span>MIT License</span>
+            <span class="badge badge--blue"><span class="dot"></span>Open membership</span>
+          </div>
+        </div>
+
+    </div>
+  </section>
+
+
+<!-- ============ TEAM TEASER ============ -->
+  <section class="section section--soft">
+    <div class="wrap">
+      <div class="grid grid-2" style="align-items:center; gap:48px;">
+        <div class="framed">
+          <a href="team.html"><img src="assets/team.jpg" alt="The MOSAIC launching group at the AI Security Policy Forum in Washington DC, April 21 2026" /></a>
+        </div>
+        <div>
+          <div class="eyebrow">The launching group</div>
+          <h2 style="margin-bottom:14px;">Convened in one room, in one afternoon.</h2>
+          <p class="prose">
+            The people who write the frameworks that will shape AI security sat down together and
+            agreed to coordinate as a collective — the first collaboration of its kind among AI
+            security standard organizations.
+          </p>
+          <div style="margin-top:22px;">
+            <a class="btn btn-secondary" href="team.html">See the full team
+              <svg viewBox="0 0 24 24"><path d="M5 12h12.17l-5.59 5.59L13 19l8-8-8-8-1.42 1.41L17.17 10H5z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PURPOSE ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">What is MOSAIC</div>
+        <h3>Coordination, not another committee.</h3>
+      </div>
+      <div class="prose">
+        <p>
+          MOSAIC — Multi-Organization Secure AI Coordination — provides a coordination structure
+          for initiatives working on AI security standards and guidelines, reducing inconsistencies,
+          duplicate work, misalignment, and gaps.
+        </p>
+        <p>
+          The end goal is a standards and guideline landscape that gives clear guidance for securing
+          and overseeing the AI systems we increasingly connect to everything and trust with our
+          sensitive data. The approach is deliberately lightweight: improve consistency and quality
+          across initiatives without adding process overhead, while every participant keeps its independence.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THE PROBLEM ============ -->
+  <section class="section section--soft">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">The problem</div>
+        <h3>AI adoption is outpacing AI security.</h3>
+        <p class="lede" style="margin-top:14px;">
+          Organizations are connecting AI to everything at speed — while the guidance meant to
+          secure it stays fragmented and hard to apply.
+        </p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0f7d86" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.4 0z"/></svg></div>
+          <h3>New, novel risks</h3>
+          <p>AI systems are vulnerable to both existing and new classes of attack that require specific countermeasures — and many organizations aren't prepared.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#5ba3d0" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+          <h3>A fragmented landscape</h3>
+          <p>Practitioners face multiple frameworks, overlapping recommendations, and inconsistent terminology. Each initiative has strengths — and blind spots.</p>
+        </div>
+        <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></div>
+          <h3>Speed that becomes delay</h3>
+          <p>When risks materialize, projects pause and designs get revisited. What looks like speed at the start often turns into rework later.</p>
+        </div>
+      </div>
+      <p class="prose" style="margin-top:28px;">
+        Aligning standards and guidance across initiatives reduces fragmentation, improves clarity,
+        and gives practitioners a coherent path forward — letting organizations move fast without
+        losing control.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ THE LAUNCH ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">April 21, 2026 · Washington DC</div>
+        <h3>How MOSAIC began.</h3>
+      </div>
+      <div class="prose">
+        <p>
+          At the AI Security Policy Forum — organized and led by the OWASP AI Exchange with the
+          SANS Institute as co-host — leading standardization initiatives came together and agreed
+          to begin coordinating collectively on AI security. The invitation-only session ran under
+          Chatham House rules and was led by Rob van der Veer, founder of the AI Exchange.
+        </p>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:36px;">
+        <div class="card">
+          <h3>What the group decided</h3>
+          <ul class="checklist" style="margin-top:16px;">
+            <li>Start coordinating collectively, under the name MOSAIC</li>
+            <li>Use GitHub as the shared communication platform</li>
+            <li>Keep participants fully independent</li>
+            <li>Prefer lightweight coordination over more committees</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>The shared view</h3>
+          <p style="margin-top:12px;">
+            AI's possibilities and challenges are evolving rapidly, and adoption is currently
+            outpacing security — leaving security as an afterthought. Standards today are fragmented,
+            creating uncertainty and slowing innovation. A cohesive standards landscape is required
+            to enable both speed and safe adoption.
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;">
+        <a class="btn btn-secondary" href="news.html">
+          Read the announcements
+          <svg viewBox="0 0 24 24"><path d="M5 12h12.17l-5.59 5.59L13 19l8-8-8-8-1.42 1.41L17.17 10H5z"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PARTICIPANTS ============ -->
+  <section class="section section--soft">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Founding participants</div>
+        <h3>The initiatives at the table.</h3>
+      </div>
+      <div class="logo-grid">
+        <span class="logo-item" data-name="Berryville Institute of Machine Learning (BIML)"><img src="assets/members/BIML.png" alt="Berryville Institute of Machine Learning (BIML)" /></span>
+        <span class="logo-item" data-name="Center for Internet Security (CIS)"><img src="assets/members/CIS.svg" alt="Center for Internet Security (CIS)" /></span>
+        <span class="logo-item" data-name="Cloud Security Alliance (CSA)"><img src="assets/members/CSA.svg" alt="Cloud Security Alliance (CSA)" /></span>
+        <span class="logo-item" data-name="Coalition for Secure AI (CoSAI)"><img src="assets/members/CoSAI.png" alt="Coalition for Secure AI (CoSAI)" /></span>
+        <span class="logo-item" data-name="National Institute of Standards and Technology (NIST)"><img src="assets/members/NIST.png" alt="National Institute of Standards and Technology (NIST)" /></span>
+        <span class="logo-item" data-name="OWASP AI Exchange (AIX)"><img src="assets/members/AIX.png" alt="OWASP AI Exchange (AIX)" /></span>
+        <span class="logo-item" data-name="OWASP GenAI Security Project (GenAIP)"><img src="assets/members/GenAIP.png" alt="OWASP GenAI Security Project (GenAIP)" /></span>
+        <span class="logo-item" data-name="SANS Institute (SANS)"><img src="assets/members/SANS.svg" alt="SANS Institute (SANS)" /></span>
+      </div>
+      <p class="prose" style="margin-top:32px;">
+        Standard makers were joined by journalists and representatives from the International
+        Telecommunication Union (ITU), the Aspen Institute, academia, and government — helping
+        prioritize the topics to focus on.
+        <a href="team.html">Meet the people &rarr;</a>
+      </p>
+    </div>
+  </section>
+
+
+
+  <!-- ============ SHARED FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="MOSAIC logo" />
+          <span>MOSAIC</span>
+        </div>
+        <div class="footer-links">
+          <a href="news.html">News</a>
+          <a href="privacy.html">Privacy</a>
+          <div class="footer-social">
+            <a href="https://github.com/OWASP/MOSAIC/#mosaic" target="_blank" rel="noopener" aria-label="GitHub">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/company/mosaic-standards/about/" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0H12v2.2h.07c.63-1.2 2.17-2.46 4.46-2.46C21.4 7.74 23 10.06 23 14.34V24h-5v-8.5c0-2.03-.73-3.42-2.55-3.42-1.39 0-2.22.94-2.58 1.85-.14.32-.17.77-.17 1.22V24h-5s.07-14.55 0-16z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>MOSAIC — Multi-Organization Secure AI Coordination · Coordinated on the OWASP Foundation GitHub.</span>
+        <span class="license">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#8ea4bd"><path d="M12 2 2 7v6c0 5 4 9 10 11 6-2 10-6 10-11V7L12 2z"/></svg>
+          Released under the MIT License
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/gh-stars.js"></script>
+</body>
+</html>

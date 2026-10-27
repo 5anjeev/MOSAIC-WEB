@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecosystem — MOSAIC</title>
+  <meta name="description" content="The MOSAIC standards landscape: explore members and the resources they publish." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- ============ Standards landscape explorer (scoped to this page) ============ -->
+  <style>
+    /* ---- stat tiles ---- */
+    .eco-stats { display:flex; gap:14px; flex-wrap:wrap; margin:0 0 22px; }
+    .stat-tile { flex:1 1 120px; background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+    .stat-num { font-size:1.5rem; font-weight:600; color:var(--navy); line-height:1.1; }
+    .stat-num.accentn { color:var(--teal); }
+    .stat-lab { font-family:var(--font-mono); font-size:.7rem; letter-spacing:.03em; color:var(--faint); text-transform:uppercase; margin-top:4px; }
+
+    /* ---- search ---- */
+    .eco-search { position:relative; margin-bottom:16px; }
+    .eco-search input {
+      width:100%; font-family:var(--font-sans); font-size:1rem; color:var(--ink);
+      padding:13px 16px 13px 44px; border:1px solid var(--border); border-radius:var(--radius); background:#fff;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .eco-search input:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(15,125,134,.12); }
+    .eco-search > svg { position:absolute; left:15px; top:50%; transform:translateY(-50%); width:18px; height:18px; fill:var(--faint); }
+
+    /* ---- control row ---- */
+    .eco-ctrls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .cat-tabs { display:flex; gap:8px; flex-wrap:wrap; flex:1 1 auto; }
+    .cat-tab {
+      font-family:var(--font-mono); font-size:.74rem; letter-spacing:.01em;
+      border:1px solid var(--border); background:#fff; color:var(--muted);
+      padding:7px 13px; border-radius:999px; cursor:pointer; transition:all .15s; white-space:nowrap;
+    }
+    .cat-tab:hover { border-color:var(--faint); color:var(--ink); }
+    .cat-tab.active { background:var(--navy); border-color:var(--navy); color:#fff; }
+    .cat-tab .c { opacity:.7; margin-left:3px; }
+    .ctrl-right { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    .ctrl-sel { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:.74rem; color:var(--muted); }
+    .ctrl-sel select { font-family:var(--font-mono); font-size:.74rem; color:var(--ink); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 8px; background:#fff; cursor:pointer; }
+    .grp-toggle { display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:.74rem; color:var(--muted); cursor:pointer; user-select:none; }
+    .grp-toggle input { position:absolute; opacity:0; width:0; height:0; }
+    .grp-track { width:38px; height:22px; border-radius:999px; background:var(--border); position:relative; transition:background .15s; }
+    .grp-track::after { content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:var(--shadow-sm); transition:transform .15s; }
+    .grp-toggle input:checked + .grp-track { background:var(--teal); }
+    .grp-toggle input:checked + .grp-track::after { transform:translateX(16px); }
+
+    /* ---- card grid ---- */
+    .std-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .std-grid.comfy { grid-template-columns:repeat(3,1fr); }
+    .std-group { margin-bottom:26px; }
+    .std-group-head { display:flex; align-items:baseline; gap:10px; margin-bottom:12px; }
+    .std-group-head h3 { margin:0; font-size:1rem; }
+    .std-group-head .cnt { font-family:var(--font-mono); font-size:.74rem; color:var(--faint); }
+
+    .std-card {
+      display:flex; flex-direction:column; background:#fff; border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:15px 16px; cursor:pointer; min-height:150px;
+      transition:box-shadow .16s, transform .16s, border-color .16s;
+    }
+    .std-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); border-color:#c8d2dc; }
+    .std-card.sel { border-color:var(--teal); box-shadow:0 0 0 2px rgba(15,125,134,.18); }
+    .sc-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+    .sc-org { display:flex; align-items:center; gap:7px; min-width:0; }
+    .sc-org img { height:16px; max-width:52px; width:auto; object-fit:contain; }
+    .sc-org span { font-family:var(--font-mono); font-size:.68rem; color:var(--faint); letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sc-cat { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.02em; padding:2px 7px; border-radius:999px; border:1px solid; white-space:nowrap; }
+    .sc-name { font-size:.92rem; font-weight:600; color:var(--ink); line-height:1.3; margin:0 0 9px; }
+    .sc-stage { align-self:flex-start; font-family:var(--font-mono); font-size:.64rem; padding:3px 9px; border-radius:999px; margin-bottom:9px; }
+    .sc-desc { font-size:.8rem; color:var(--muted); line-height:1.45; margin:0 0 12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .sc-foot { margin-top:auto; display:flex; align-items:center; justify-content:space-between; font-family:var(--font-mono); font-size:.68rem; color:var(--faint); }
+    .sc-foot .dom { display:inline-flex; align-items:center; gap:4px; }
+    .sc-foot svg { width:12px; height:12px; fill:currentColor; }
+
+    /* category badge colors */
+    .cat-Community  { color:#3a7399; border-color:#cfe2f0; background:#eef6fb; }
+    .cat-Standards  { color:var(--navy); border-color:#c3d2e2; background:#eef3f8; }
+    .cat-Industry   { color:var(--teal); border-color:#bfe0e3; background:#edf7f8; }
+    .cat-Government  { color:#5a8a2a; border-color:#d4e7bf; background:#f0f7e8; }
+    .cat-Nonprofit  { color:#8a6d1f; border-color:#e8dcb6; background:#f8f3e2; }
+    .cat-Training   { color:#a4552a; border-color:#eed5c4; background:#fbefe7; }
+    .cat-Research   { color:var(--teal-600); border-color:#bfe0e3; background:#edf7f8; }
+
+    /* stage colors */
+    .stg-pub { color:#4f7a1f; background:#eef6e2; }
+    .stg-dev { color:#8a6d1f; background:#f8f1dc; }
+    .stg-other { color:var(--muted); background:var(--bg-soft); }
+
+    /* ---- type tags (drawer) ---- */
+    .ttag { display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.02em; padding:3px 9px; border-radius:999px; border:1px solid; line-height:1.4; white-space:nowrap; }
+    .ttag.t-threat  { color:var(--teal); border-color:#bfe0e3; background:#edf7f8; }
+    .ttag.t-control { color:var(--navy); border-color:#c3d2e2; background:#eef3f8; }
+    .ttag.t-guide   { color:#3a7399; border-color:#cfe2f0; background:#eef6fb; }
+    .ttag.t-train   { color:#5a8a2a; border-color:#d4e7bf; background:#f0f7e8; }
+    .ttag.t-tool    { color:var(--muted); border-color:var(--border); background:var(--bg-soft); }
+    .ttag.t-other   { color:var(--faint); border-color:var(--border); background:var(--bg-soft); }
+
+    .eco-empty { color:var(--muted); font-size:.95rem; padding:40px 0; text-align:center; }
+
+    /* ---- right-side drawer ---- */
+    .drawer-scrim { position:fixed; inset:0; background:rgba(10,27,42,.4); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity .2s; z-index:55; }
+    .drawer-scrim.open { opacity:1; pointer-events:auto; }
+    .drawer {
+      position:fixed; top:0; right:0; height:100%; width:440px; max-width:92vw; background:#fff; z-index:56;
+      box-shadow:-10px 0 40px rgba(10,27,42,.18); transform:translateX(100%); transition:transform .22s ease;
+      overflow-y:auto; padding:26px 28px 40px;
+    }
+    .drawer.open { transform:translateX(0); }
+    .drawer-close { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:#fff; color:var(--muted); cursor:pointer; display:grid; place-items:center; }
+    .drawer-close:hover { background:var(--bg-soft); color:var(--ink); }
+    .drawer-close svg { width:18px; height:18px; fill:currentColor; }
+    .dw-org { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-right:40px; }
+    .dw-org img { height:26px; max-width:90px; width:auto; object-fit:contain; }
+    .dw-org span { font-family:var(--font-mono); font-size:.76rem; color:var(--faint); }
+    .dw-title { font-size:1.3rem; margin:0 0 6px; color:var(--ink); }
+    .dw-sub { font-size:.92rem; color:var(--muted); line-height:1.5; margin:0 0 14px; }
+    .dw-chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+    .dw-desc { font-size:.9rem; color:var(--body); line-height:1.6; margin:0 0 18px; }
+    .dw-row { display:grid; grid-template-columns:120px 1fr; gap:10px; padding:10px 0; border-top:1px solid var(--border-soft); font-size:.88rem; }
+    .dw-row .k { font-family:var(--font-mono); font-size:.72rem; letter-spacing:.02em; color:var(--faint); text-transform:uppercase; padding-top:2px; }
+    .dw-row .v { color:var(--body); line-height:1.5; }
+    .dw-row .v .tocf { color:var(--faint); font-style:italic; }
+    .dw-links { display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+    .dw-links a { font-family:var(--font-mono); font-size:.82rem; color:var(--teal); display:inline-flex; align-items:center; gap:6px; }
+    .dw-links a:hover { color:var(--teal-600); }
+    .dw-links svg { width:13px; height:13px; fill:currentColor; }
+
+    @media (max-width:1100px) { .std-grid { grid-template-columns:repeat(3,1fr); } .std-grid.comfy { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:760px) { .std-grid, .std-grid.comfy { grid-template-columns:1fr; } .ctrl-right { width:100%; } }
+  </style>
+</head>
+<body>
+
+  <!-- ============ SHARED HEADER ============ -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="MOSAIC logo" />
+        <span>
+          <span class="brand-name">MOSAIC</span>
+          <span class="brand-sub">Multi-Organization Secure AI Coordination</span>
+        </span>
+      </a>
+      <button class="hamburger" aria-label="Toggle navigation" onclick="document.getElementById('nav').classList.toggle('open')">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </button>
+      <nav class="nav" id="nav">
+        <a href="index.html">Home</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="team.html">Team</a>
+        <a href="news.html">News</a>
+        <a href="collab.html" class="active">Ecosystem</a>
+        <a class="gh-btn" href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub<span class="stars" id="gh-stars">★ 1.2k</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ PAGE HEAD ============ -->
+  <div class="page-head">
+    <div class="wrap">
+      <div class="breadcrumb"><a href="index.html">Home</a> / Ecosystem</div>
+      <h1>Standards landscape</h1>
+      <p>Explore the MOSAIC members and the resources they publish across the AI security ecosystem.</p>
+    </div>
+  </div>
+
+  <!-- ============ EXPLORER ============ -->
+  <section class="section">
+    <div class="wrap">
+
+      <div class="eco-stats">
+        <div class="stat-tile"><div class="stat-num accentn" id="statFiltered">0</div><div class="stat-lab">Filtered results</div></div>
+        <div class="stat-tile"><div class="stat-num" id="statResources">0</div><div class="stat-lab">Resources</div></div>
+        <div class="stat-tile"><div class="stat-num" id="statOrgs">0</div><div class="stat-lab">Organizations</div></div>
+        <div class="stat-tile"><div class="stat-num" id="statTypes">0</div><div class="stat-lab">Resource types</div></div>
+      </div>
+
+      <div class="eco-search">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <input type="search" id="ecoSearch" placeholder="Search members and resources..." aria-label="Search the ecosystem" />
+      </div>
+
+      <div class="eco-ctrls">
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="ctrl-right">
+          <span class="ctrl-sel">Sort
+            <select id="sortSel">
+              <option value="relevance">Relevance</option>
+              <option value="az">A to Z</option>
+              <option value="newest">Newest</option>
+            </select>
+          </span>
+          <span class="ctrl-sel">Density
+            <select id="densSel">
+              <option value="compact">Compact</option>
+              <option value="comfy">Comfortable</option>
+            </select>
+          </span>
+          <label class="grp-toggle"><input type="checkbox" id="grpChk"><span class="grp-track"></span>Group by type</label>
+        </div>
+      </div>
+
+      <div id="stdResults"></div>
+    </div>
+  </section>
+
+  <!-- ============ COORDINATION REPO + MORE ============ -->
+  <section class="section section--soft">
+    <div class="wrap">
+      <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+        <div style="max-width:560px;">
+          <h3 style="margin-bottom:8px;">The coordination repository</h3>
+          <p>MOSAIC coordinates in the open on the OWASP Foundation GitHub — discussions, the initiative map, and shared definitions all live there.</p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            github.com/OWASP/MOSAIC
+          </a>
+          <a class="btn btn-secondary" href="https://github.com/OWASP/MOSAIC/discussions" target="_blank" rel="noopener">
+            Discussions
+            <svg viewBox="0 0 24 24"><path d="M5 12h12.17l-5.59 5.59L13 19l8-8-8-8-1.42 1.41L17.17 10H5z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-3" style="margin-top:28px;">
+        <div class="card eco-card is-live">
+          <span class="soon">Live</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></div>
+          <h3>Roadmap</h3>
+          <p>The current alignment activities, Milestone 1, and beyond. <a href="roadmap.html">View it &rarr;</a></p>
+        </div>
+        <div class="card eco-card is-live">
+          <span class="soon">Live</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <h3>Source &amp; discussions</h3>
+          <p>Everything lives in the open. <a href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">Open on GitHub &rarr;</a></p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#5ba3d0" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <h3>Changelog</h3>
+          <p>A running record of decisions, definitions, and deliverables as they're published.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DRAWER ============ -->
+  <div class="drawer-scrim" id="drawerScrim"></div>
+  <aside class="drawer" id="drawer" aria-label="Resource detail">
+    <button class="drawer-close" id="drawerClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>
+    <div id="drawerBody"></div>
+  </aside>
+
+  <!-- ============ SHARED FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="MOSAIC logo" />
+          <span>MOSAIC</span>
+        </div>
+        <div class="footer-links">
+          <a href="news.html">News</a>
+          <a href="privacy.html">Privacy</a>
+          <div class="footer-social">
+            <a href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener" aria-label="GitHub">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/company/mosaic-standards/about/" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0H12v2.2h.07c.63-1.2 2.17-2.46 4.46-2.46C21.4 7.74 23 10.06 23 14.34V24h-5v-8.5c0-2.03-.73-3.42-2.55-3.42-1.39 0-2.22.94-2.58 1.85-.14.32-.17.77-.17 1.22V24h-5s.07-14.55 0-16z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>MOSAIC — Multi-Organization Secure AI Coordination · Coordinated on the OWASP Foundation GitHub.</span>
+        <span class="license">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#8ea4bd"><path d="M12 2 2 7v6c0 5 4 9 10 11 6-2 10-6 10-11V7L12 2z"/></svg>
+          Released under the MIT License
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ Standards landscape data + logic ============ -->
+  <script src="assets/ecosystem-data.js"></script>
+  <script>
+  (function () {
+    var TYPE_ORDER = ["Threat model","Control model","Guide: technical","Guide: process","Training","Tool","Other"];
+    var CAT_ORDER = ["Community","Standards","Industry","Government","Nonprofit","Training","Research"];
+    function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function tagClass(t){
+      if(t==="Threat model") return "t-threat";
+      if(t==="Control model") return "t-control";
+      if(t.indexOf("Guide")===0) return "t-guide";
+      if(t==="Training") return "t-train";
+      if(t==="Tool") return "t-tool";
+      return "t-other";
+    }
+    function typeShort(t){
+      if(t==="Threat model") return "Threat";
+      if(t==="Control model") return "Control";
+      if(t.indexOf("Guide")===0) return "Guide";
+      return t;
+    }
+    function catOf(type){
+      var s=type.toLowerCase();
+      if(s.indexOf("community")>=0) return "Community";
+      if(s.indexOf("standards development")>=0) return "Standards";
+      if(s.indexOf("consortium")>=0) return "Industry";
+      if(s.indexOf("government")>=0) return "Government";
+      if(s.indexOf("training")>=0) return "Training";
+      if(s.indexOf("research")>=0) return "Research";
+      if(s.indexOf("nonprofit")>=0) return "Nonprofit";
+      return "Nonprofit";
+    }
+    function stageClass(s){
+      if(/draft|develop|dev\b|progress|active|iterat|enquiry/i.test(s)) return "stg-dev";
+      if(/publish|live/i.test(s)) return "stg-pub";
+      return "stg-other";
+    }
+    function yearOf(d){ var m=(d||"").match(/(20\d{2})/g); return m ? parseInt(m[m.length-1],10) : 0; }
+    function byKey(k){ return DATA.filter(function(i){ return i.key===k; })[0]; }
+    function tagHTML(types){ return types.map(function(t){ return '<span class="ttag '+tagClass(t)+'">'+esc(t)+'</span>'; }).join(""); }
+
+    // flatten resources with parent + category
+    var ALL = [];
+    DATA.forEach(function(init){
+      var cat = catOf(init.type);
+      init.resources.forEach(function(r){ ALL.push(Object.assign({ init:init, cat:cat }, r)); });
+    });
+
+    var state = { q:"", cat:"All", sort:"relevance", dens:"compact", group:false };
+    var results = document.getElementById("stdResults");
+    var catTabs = document.getElementById("catTabs");
+
+    function match(r){
+      if(state.cat!=="All" && r.cat!==state.cat) return false;
+      if(!state.q) return true;
+      var hay = (r.name+" "+r.desc+" "+r.types.join(" ")+" "+r.stage+" "+r.date+" "+r.init.name+" "+r.init.type+" "+r.init.scope).toLowerCase();
+      return hay.indexOf(state.q)>=0;
+    }
+    function sortList(list){
+      var l = list.slice();
+      if(state.sort==="az") l.sort(function(a,b){ return a.name.localeCompare(b.name); });
+      else if(state.sort==="newest") l.sort(function(a,b){ return yearOf(b.date)-yearOf(a.date); });
+      return l;
+    }
+
+    function cardHTML(r){
+      return '<article class="std-card" data-init="'+r.init.key+'" data-res="'+esc(r.name)+'">'
+        + '<div class="sc-top"><div class="sc-org"><img src="'+r.init.logo+'" alt="'+esc(r.init.name)+'"><span>'+esc(r.init.short)+'</span></div>'
+        + '<span class="sc-cat cat-'+r.cat+'">'+esc(r.cat)+'</span></div>'
+        + '<h4 class="sc-name">'+esc(r.name)+'</h4>'
+        + '<span class="sc-stage '+stageClass(r.stage)+'">'+esc(r.stage)+'</span>'
+        + '<p class="sc-desc">'+esc(r.desc)+'</p>'
+        + '<div class="sc-foot"><span class="dom"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z"/></svg>'+esc(typeShort(r.types[0]))+'</span>'
+        + '<span class="dom"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2 .8-1.3-2.3-1.4V8zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>AI</span></div>'
+        + '</article>';
+    }
+
+    function render(){
+      var items = sortList(ALL.filter(match));
+      var gridCls = "std-grid" + (state.dens==="comfy" ? " comfy" : "");
+      if(!items.length){ results.innerHTML = '<p class="eco-empty">Nothing matches your search or filter.</p>'; }
+      else if(state.group){
+        var html="";
+        TYPE_ORDER.forEach(function(t){
+          var g = items.filter(function(r){ return r.types.indexOf(t)>=0; });
+          if(!g.length) return;
+          html += '<div class="std-group"><div class="std-group-head"><h3>'+esc(t)+'</h3><span class="cnt">'+g.length+'</span></div>'
+               + '<div class="'+gridCls+'">'+g.map(cardHTML).join("")+'</div></div>';
+        });
+        results.innerHTML = html;
+      } else {
+        results.innerHTML = '<div class="'+gridCls+'">'+items.map(cardHTML).join("")+'</div>';
+      }
+      document.getElementById("statFiltered").textContent = items.length;
+    }
+
+    function renderTabs(){
+      var tabs = [{k:"All", n:ALL.length}];
+      CAT_ORDER.forEach(function(c){
+        var n = ALL.filter(function(r){ return r.cat===c; }).length;
+        if(n) tabs.push({k:c, n:n});
+      });
+      catTabs.innerHTML = tabs.map(function(t){
+        return '<button class="cat-tab'+(state.cat===t.k?' active':'')+'" data-cat="'+esc(t.k)+'">'+esc(t.k)+'<span class="c">'+t.n+'</span></button>';
+      }).join("");
+    }
+
+    // ---- drawer ----
+    var scrim = document.getElementById("drawerScrim");
+    var drawer = document.getElementById("drawer");
+    var dBody = document.getElementById("drawerBody");
+    var extIcon = '<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>';
+
+    function openDrawer(key, name){
+      var i = byKey(key); if(!i) return;
+      var r = i.resources.filter(function(x){ return x.name===name; })[0]; if(!r) return;
+      var cat = catOf(i.type);
+      var liaison = i.liaisonConfirmed ? esc(i.liaison) : esc(i.liaison)+' <span class="tocf">(to confirm)</span>';
+      var links = '<a href="'+r.url+'" target="_blank" rel="noopener">Open resource '+extIcon+'</a>'
+        + '<a href="'+i.url+'" target="_blank" rel="noopener">'+esc(i.short)+' home '+extIcon+'</a>';
+      if(i.deliverables) links += '<a href="'+i.deliverables+'" target="_blank" rel="noopener">Deliverables '+extIcon+'</a>';
+      if(i.roadmap) links += '<a href="'+i.roadmap+'" target="_blank" rel="noopener">Roadmap '+extIcon+'</a>';
+      dBody.innerHTML = '<div class="dw-org"><img src="'+i.logo+'" alt="'+esc(i.name)+'"><span>'+esc(i.name)+'</span></div>'
+        + '<h2 class="dw-title">'+esc(r.name)+'</h2>'
+        + '<p class="dw-sub">'+esc(i.scope)+'</p>'
+        + '<div class="dw-chips"><span class="sc-stage '+stageClass(r.stage)+'">'+esc(r.stage)+'</span>'+tagHTML(r.types)+'</div>'
+        + '<p class="dw-desc">'+esc(r.desc)+'</p>'
+        + '<div class="dw-row"><span class="k">Organization</span><span class="v">'+esc(i.name)+'</span></div>'
+        + '<div class="dw-row"><span class="k">Category</span><span class="v">'+esc(cat)+' · '+esc(i.type)+'</span></div>'
+        + '<div class="dw-row"><span class="k">Type</span><span class="v">'+r.types.map(esc).join(", ")+'</span></div>'
+        + '<div class="dw-row"><span class="k">Stage</span><span class="v">'+esc(r.stage)+'</span></div>'
+        + '<div class="dw-row"><span class="k">Date</span><span class="v">'+esc(r.date)+'</span></div>'
+        + '<div class="dw-row"><span class="k">Liaison</span><span class="v">'+liaison+'</span></div>'
+        + '<div class="dw-row"><span class="k">Geography</span><span class="v">'+esc(i.geo)+'</span></div>'
+        + '<div class="dw-links">'+links+'</div>';
+      scrim.classList.add("open"); drawer.classList.add("open");
+      [].forEach.call(document.querySelectorAll(".std-card.sel"), function(c){ c.classList.remove("sel"); });
+      var card = document.querySelector('.std-card[data-init="'+key+'"][data-res="'+(window.CSS&&CSS.escape?CSS.escape(name):name)+'"]');
+    }
+    function closeDrawer(){ scrim.classList.remove("open"); drawer.classList.remove("open"); }
+
+    // ---- events ----
+    document.getElementById("ecoSearch").addEventListener("input", function(e){ state.q=e.target.value.trim().toLowerCase(); render(); });
+    catTabs.addEventListener("click", function(e){ var b=e.target.closest("button[data-cat]"); if(!b) return; state.cat=b.getAttribute("data-cat"); renderTabs(); render(); });
+    document.getElementById("sortSel").addEventListener("change", function(e){ state.sort=e.target.value; render(); });
+    document.getElementById("densSel").addEventListener("change", function(e){ state.dens=e.target.value; render(); });
+    document.getElementById("grpChk").addEventListener("change", function(e){ state.group=e.target.checked; render(); });
+    results.addEventListener("click", function(e){ var c=e.target.closest(".std-card"); if(!c) return;
+      [].forEach.call(document.querySelectorAll(".std-card.sel"), function(x){ x.classList.remove("sel"); });
+      c.classList.add("sel"); openDrawer(c.getAttribute("data-init"), c.getAttribute("data-res"));
+    });
+    document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+    scrim.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeDrawer(); });
+
+    // ---- init ----
+    document.getElementById("statResources").textContent = ALL.length;
+    document.getElementById("statOrgs").textContent = DATA.length;
+    document.getElementById("statTypes").textContent = TYPE_ORDER.length;
+    renderTabs();
+    render();
+  })();
+  </script>
+  <script src="assets/gh-stars.js"></script>
+</body>
+</html>

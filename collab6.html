@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecosystem — MOSAIC</title>
+  <meta name="description" content="The MOSAIC ecosystem: every member and the resources they publish, in one view." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- ============ Ecosystem (grouped by initiative) — scoped to this page ============ -->
+  <style>
+    /* ---- sticky controls ---- */
+    .eco-sticky {
+      position:sticky; top:62px; z-index:20; background:rgba(255,255,255,.92); backdrop-filter:blur(6px);
+      border-bottom:1px solid var(--border-soft); padding:14px 0;
+    }
+    .eco-sticky-inner { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    .eco-search { position:relative; flex:0 1 300px; min-width:200px; }
+    .eco-search input {
+      width:100%; font-family:var(--font-sans); font-size:.92rem; color:var(--ink);
+      padding:10px 14px 10px 38px; border:1px solid var(--border); border-radius:var(--radius-sm); background:#fff;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .eco-search input:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(15,125,134,.12); }
+    .eco-search svg { position:absolute; left:13px; top:50%; transform:translateY(-50%); width:16px; height:16px; fill:var(--faint); }
+    .type-filters { display:flex; flex-wrap:wrap; gap:8px; }
+    .tfilter {
+      font-family:var(--font-mono); font-size:.72rem; letter-spacing:.02em;
+      border:1px solid var(--border); background:#fff; color:var(--muted);
+      padding:6px 12px; border-radius:999px; cursor:pointer; transition:all .15s;
+    }
+    .tfilter:hover { border-color:var(--faint); color:var(--ink); }
+    .tfilter.active { background:var(--navy); border-color:var(--navy); color:#fff; }
+    .result-note { font-family:var(--font-mono); font-size:.74rem; color:var(--faint); margin-left:auto; }
+
+    /* ---- initiative band ---- */
+    .eco-band { padding:26px 0; border-bottom:1px solid var(--border-soft); }
+    .eco-band:last-child { border-bottom:0; }
+    .band-head { display:flex; align-items:flex-start; gap:20px; margin-bottom:18px; flex-wrap:wrap; }
+    .band-logo { flex:0 0 120px; height:56px; display:flex; align-items:center; justify-content:flex-start; }
+    .band-logo img { max-height:48px; max-width:120px; width:auto; object-fit:contain; }
+    .band-logo img[src$="AIX.png"] { border-radius:5px; }
+    .band-info { flex:1 1 320px; min-width:0; }
+    .band-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .band-name { font-size:1.15rem; font-weight:600; color:var(--ink); margin:0; }
+    .band-type { font-family:var(--font-mono); font-size:.66rem; text-transform:uppercase; letter-spacing:.03em; color:var(--teal); border:1px solid #bfe0e3; background:#edf7f8; padding:3px 8px; border-radius:999px; }
+    .band-scope { font-size:.9rem; color:var(--muted); line-height:1.5; margin:8px 0 8px; max-width:68ch; }
+    .band-metarow { display:flex; align-items:center; gap:16px; flex-wrap:wrap; font-size:.8rem; color:var(--body); }
+    .band-metarow .tocf { color:var(--faint); font-style:italic; }
+    .band-metarow a { font-family:var(--font-mono); font-size:.76rem; }
+    .band-right { flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    .band-count { font-family:var(--font-mono); font-size:.74rem; color:var(--faint); }
+    .band-viewall {
+      font-family:var(--font-mono); font-size:.74rem; color:#fff; background:var(--navy); border:0;
+      padding:7px 14px; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+      transition:background .15s;
+    }
+    .band-viewall:hover { background:var(--navy-700); }
+    .band-viewall svg { width:13px; height:13px; fill:currentColor; }
+
+    .band-res { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+
+    /* ---- resource card ---- */
+    .res-card {
+      display:flex; flex-direction:column; background:#fff; border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:16px 16px; cursor:pointer;
+      transition:box-shadow .18s, transform .18s, border-color .18s;
+    }
+    .res-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); border-color:#c8d2dc; }
+    .res-name { font-size:.92rem; font-weight:600; color:var(--ink); line-height:1.35; margin:0 0 9px; }
+    .res-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px; }
+    .res-desc { font-size:.82rem; color:var(--muted); line-height:1.48; margin:0 0 11px; }
+    .res-foot { margin-top:auto; display:flex; align-items:center; justify-content:space-between; font-family:var(--font-mono); font-size:.69rem; }
+    .res-stage { color:var(--green); }
+    .res-stage.dev { color:var(--blue); }
+    .res-date { color:var(--faint); }
+
+    /* ---- type tags ---- */
+    .ttag { display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.02em; padding:3px 8px; border-radius:999px; border:1px solid; line-height:1.4; white-space:nowrap; }
+    .ttag.t-threat  { color:var(--teal); border-color:#bfe0e3; background:#edf7f8; }
+    .ttag.t-control { color:var(--navy); border-color:#c3d2e2; background:#eef3f8; }
+    .ttag.t-guide   { color:#3a7399; border-color:#cfe2f0; background:#eef6fb; }
+    .ttag.t-train   { color:#5a8a2a; border-color:#d4e7bf; background:#f0f7e8; }
+    .ttag.t-tool    { color:var(--muted); border-color:var(--border); background:var(--bg-soft); }
+    .ttag.t-other   { color:var(--faint); border-color:var(--border); background:var(--bg-soft); }
+
+    .eco-empty { color:var(--muted); font-size:.95rem; padding:40px 0; text-align:center; }
+
+    /* ---- modal (same system as collab5) ---- */
+    .modal-overlay { position:fixed; inset:0; background:rgba(10,27,42,.55); backdrop-filter:blur(3px); display:none; align-items:flex-start; justify-content:center; z-index:60; padding:40px 20px; overflow-y:auto; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-lg); max-width:680px; width:100%; padding:30px 30px 34px; position:relative; animation:modal-in .18s ease; }
+    @keyframes modal-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .modal-close { position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:#fff; color:var(--muted); cursor:pointer; display:grid; place-items:center; }
+    .modal-close:hover { background:var(--bg-soft); color:var(--ink); }
+    .modal-close svg { width:18px; height:18px; fill:currentColor; }
+    .modal-head { display:flex; align-items:center; gap:14px; margin-bottom:6px; padding-right:40px; }
+    .modal-head img { max-height:38px; max-width:120px; width:auto; object-fit:contain; }
+    .modal-eyebrow { font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--teal); }
+    .modal h2 { font-size:1.35rem; margin:4px 0 10px; }
+    .modal-meta { font-size:.88rem; color:var(--body); line-height:1.6; margin-bottom:14px; }
+    .modal-meta strong { color:var(--ink); }
+    .modal-links { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 6px; }
+    .modal-reslist { margin-top:18px; border-top:1px solid var(--border-soft); padding-top:16px; }
+    .modal-resrow { padding:12px 0; border-bottom:1px solid var(--border-soft); cursor:pointer; }
+    .modal-resrow:last-child { border-bottom:0; }
+    .modal-resrow:hover .mrr-name { color:var(--teal); }
+    .mrr-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .mrr-name { font-weight:600; color:var(--ink); font-size:.95rem; }
+    .mrr-date { font-family:var(--font-mono); font-size:.72rem; color:var(--faint); white-space:nowrap; }
+    .mrr-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .mrr-desc { font-size:.85rem; color:var(--muted); line-height:1.5; margin-top:6px; }
+
+    @media (max-width:1100px) { .band-res { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:760px) {
+      .eco-sticky { top:0; }
+      .band-res { grid-template-columns:1fr; }
+      .band-head { flex-direction:column; }
+      .band-right { align-items:flex-start; flex-direction:row; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ SHARED HEADER ============ -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="MOSAIC logo" />
+        <span>
+          <span class="brand-name">MOSAIC</span>
+          <span class="brand-sub">Multi-Organization Secure AI Coordination</span>
+        </span>
+      </a>
+      <button class="hamburger" aria-label="Toggle navigation" onclick="document.getElementById('nav').classList.toggle('open')">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </button>
+      <nav class="nav" id="nav">
+        <a href="index.html">Home</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="team.html">Team</a>
+        <a href="news.html">News</a>
+        <a href="collab.html" class="active">Ecosystem</a>
+        <a class="gh-btn" href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub<span class="stars" id="gh-stars">★ 1.2k</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ PAGE HEAD ============ -->
+  <div class="page-head">
+    <div class="wrap">
+      <div class="breadcrumb"><a href="index.html">Home</a> / Ecosystem</div>
+      <h1>Ecosystem</h1>
+      <p>
+        Every MOSAIC member and the resources they publish, in one scroll. Search or filter by
+        type to narrow the whole landscape in place, and open any item for the detail.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ STICKY CONTROLS ============ -->
+  <div class="eco-sticky">
+    <div class="wrap">
+      <div class="eco-sticky-inner">
+        <div class="eco-search">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+          <input type="search" id="ecoSearch" placeholder="Search all members and resources..." aria-label="Search the ecosystem" />
+        </div>
+        <div class="type-filters" id="typeFilters"></div>
+        <span class="result-note" id="resultNote"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ECOSYSTEM ============ -->
+  <section class="section" style="padding-top:20px;">
+    <div class="wrap">
+      <div id="ecosystem"></div>
+    </div>
+  </section>
+
+  <!-- ============ MODAL ============ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalBox" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- ============ COORDINATION REPO + MORE ============ -->
+  <section class="section section--soft">
+    <div class="wrap">
+      <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+        <div style="max-width:560px;">
+          <h3 style="margin-bottom:8px;">The coordination repository</h3>
+          <p>MOSAIC coordinates in the open on the OWASP Foundation GitHub — discussions, the initiative map, and shared definitions all live there.</p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            github.com/OWASP/MOSAIC
+          </a>
+          <a class="btn btn-secondary" href="https://github.com/OWASP/MOSAIC/discussions" target="_blank" rel="noopener">
+            Discussions
+            <svg viewBox="0 0 24 24"><path d="M5 12h12.17l-5.59 5.59L13 19l8-8-8-8-1.42 1.41L17.17 10H5z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-3" style="margin-top:28px;">
+        <div class="card eco-card is-live">
+          <span class="soon">Live</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></div>
+          <h3>Roadmap</h3>
+          <p>The current alignment activities, Milestone 1, and beyond. <a href="roadmap.html">View it &rarr;</a></p>
+        </div>
+        <div class="card eco-card is-live">
+          <span class="soon">Live</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#7cb342" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <h3>Source &amp; discussions</h3>
+          <p>Everything lives in the open. <a href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener">Open on GitHub &rarr;</a></p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#5ba3d0" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <h3>Changelog</h3>
+          <p>A running record of decisions, definitions, and deliverables as they're published.</p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0f7d86" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Slack</h3>
+          <p>A space for real-time coordination between participating initiatives.</p>
+        </div>
+        <div class="card eco-card">
+          <span class="soon">TBD</span>
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0a2a4e" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div>
+          <h3>Integrations</h3>
+          <p>Deep links and machine-readable formats so deliverables interoperate across initiatives.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHARED FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="MOSAIC logo" />
+          <span>MOSAIC</span>
+        </div>
+        <div class="footer-links">
+          <a href="news.html">News</a>
+          <a href="privacy.html">Privacy</a>
+          <div class="footer-social">
+            <a href="https://github.com/OWASP/MOSAIC#mosaic" target="_blank" rel="noopener" aria-label="GitHub">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/company/mosaic-standards/about/" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0H12v2.2h.07c.63-1.2 2.17-2.46 4.46-2.46C21.4 7.74 23 10.06 23 14.34V24h-5v-8.5c0-2.03-.73-3.42-2.55-3.42-1.39 0-2.22.94-2.58 1.85-.14.32-.17.77-.17 1.22V24h-5s.07-14.55 0-16z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>MOSAIC — Multi-Organization Secure AI Coordination · Coordinated on the OWASP Foundation GitHub.</span>
+        <span class="license">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#8ea4bd"><path d="M12 2 2 7v6c0 5 4 9 10 11 6-2 10-6 10-11V7L12 2z"/></svg>
+          Released under the MIT License
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ Ecosystem data + logic ============ -->
+  <script src="assets/ecosystem-data.js"></script>
+  <script>
+  (function () {
+    var TYPE_ORDER = ["Threat model","Control model","Guide: technical","Guide: process","Training","Tool","Other"];
+    var PREVIEW = 5; // top resources shown per band when not filtering
+    function tagClass(t){
+      if(t==="Threat model") return "t-threat";
+      if(t==="Control model") return "t-control";
+      if(t.indexOf("Guide")===0) return "t-guide";
+      if(t==="Training") return "t-train";
+      if(t==="Tool") return "t-tool";
+      return "t-other";
+    }
+    function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function tagHTML(types){ return types.map(function(t){ return '<span class="ttag '+tagClass(t)+'">'+esc(t)+'</span>'; }).join(""); }
+    function byKey(k){ return DATA.filter(function(i){ return i.key===k; })[0]; }
+    function stageCls(s){ return /develop|dev|progress|draft/i.test(s) ? 'res-stage dev' : 'res-stage'; }
+
+    var state = { q:"", type:"All" };
+    var root = document.getElementById("ecosystem");
+    var typeFilters = document.getElementById("typeFilters");
+    var resultNote = document.getElementById("resultNote");
+
+    function resMatch(r){
+      if(state.type!=="All" && r.types.indexOf(state.type)<0) return false;
+      if(!state.q) return true;
+      var hay = (r.name+" "+r.desc+" "+r.types.join(" ")+" "+r.stage+" "+r.date).toLowerCase();
+      return hay.indexOf(state.q)>=0;
+    }
+    function initTextMatch(i){
+      if(!state.q) return true;
+      var hay = (i.name+" "+i.type+" "+i.scope+" "+i.geo+" "+i.liaison+" "+i.blurb).toLowerCase();
+      return hay.indexOf(state.q)>=0;
+    }
+
+    function resCardHTML(r, key, short){
+      return '<article class="res-card" data-init="'+key+'" data-res="'+esc(r.name)+'">'
+        + '<h4 class="res-name">'+esc(r.name)+'</h4>'
+        + '<div class="res-tags">'+tagHTML(r.types)+'</div>'
+        + '<p class="res-desc">'+esc(r.desc)+'</p>'
+        + '<div class="res-foot"><span class="'+stageCls(r.stage)+'">'+esc(r.stage)+'</span><span class="res-date">'+esc(r.date)+'</span></div>'
+        + '</article>';
+    }
+
+    function render(){
+      var filtering = !!(state.q || state.type!=="All");
+      var html = "", shownBands = 0, shownRes = 0;
+
+      DATA.forEach(function(i){
+        var matched = i.resources.filter(resMatch);
+        var showBand, list, showViewAll;
+
+        if(filtering){
+          // show the band if any resource matches, or (for a text query) the member itself matches
+          if(matched.length){ list = matched; }
+          else if(state.q && state.type==="All" && initTextMatch(i)){ list = i.resources; }
+          else { return; }
+          showBand = true; showViewAll = false;
+        } else {
+          var feat = i.resources.filter(function(r){ return r.featured; });
+          list = (feat.length ? feat : i.resources).slice(0, PREVIEW);
+          showBand = true; showViewAll = i.resources.length > list.length;
+        }
+
+        shownBands++; shownRes += list.length;
+        var liaison = i.liaisonConfirmed ? '<strong>'+esc(i.liaison)+'</strong>' : esc(i.liaison)+' <span class="tocf">(to confirm)</span>';
+        var links = '<a href="'+i.url+'" target="_blank" rel="noopener">Home</a>';
+        if(i.deliverables) links += '<a href="'+i.deliverables+'" target="_blank" rel="noopener">Deliverables</a>';
+        if(i.roadmap) links += '<a href="'+i.roadmap+'" target="_blank" rel="noopener">Roadmap</a>';
+
+        html += '<div class="eco-band">'
+          + '<div class="band-head">'
+          +   '<div class="band-logo"><img src="'+i.logo+'" alt="'+esc(i.name)+'"></div>'
+          +   '<div class="band-info">'
+          +     '<div class="band-top"><h3 class="band-name">'+esc(i.name)+'</h3><span class="band-type">'+esc(i.type)+'</span></div>'
+          +     '<p class="band-scope">'+esc(i.scope)+'</p>'
+          +     '<div class="band-metarow"><span>Liaison: '+liaison+'</span><span>'+esc(i.geo)+'</span>'+links+'</div>'
+          +   '</div>'
+          +   '<div class="band-right"><span class="band-count">'+i.resources.length+' resources</span>'
+          +     (showViewAll ? '<button class="band-viewall" data-init="'+i.key+'">View all <svg viewBox="0 0 24 24"><path d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button>' : '')
+          +   '</div>'
+          + '</div>'
+          + '<div class="band-res">'+list.map(function(r){ return resCardHTML(r, i.key, i.short); }).join("")+'</div>'
+          + '</div>';
+      });
+
+      if(!shownBands){ root.innerHTML = '<p class="eco-empty">Nothing matches your search or filter.</p>'; }
+      else { root.innerHTML = html; }
+
+      resultNote.textContent = filtering ? (shownRes+" resource"+(shownRes===1?"":"s")+" in "+shownBands+" member"+(shownBands===1?"":"s")) : "";
+    }
+
+    function renderTypeFilters(){
+      var chips = ["All"].concat(TYPE_ORDER);
+      typeFilters.innerHTML = chips.map(function(t){
+        return '<button class="tfilter'+(state.type===t?' active':'')+'" data-type="'+esc(t)+'">'+esc(t)+'</button>';
+      }).join("");
+    }
+
+    // ---- modal ----
+    var overlay = document.getElementById("modalOverlay");
+    var mContent = document.getElementById("modalContent");
+    var extIcon = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;vertical-align:-1px;"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5z"/></svg>';
+
+    function openInitModal(key){
+      var i = byKey(key); if(!i) return;
+      var liaison = i.liaisonConfirmed ? '<strong>'+esc(i.liaison)+'</strong>' : esc(i.liaison)+' <span style="color:var(--faint);font-style:italic;">(to confirm)</span>';
+      var links = '<a class="btn btn-secondary" href="'+i.url+'" target="_blank" rel="noopener">Home '+extIcon+'</a>';
+      if(i.deliverables) links += '<a class="btn btn-secondary" href="'+i.deliverables+'" target="_blank" rel="noopener">Deliverables '+extIcon+'</a>';
+      if(i.roadmap) links += '<a class="btn btn-secondary" href="'+i.roadmap+'" target="_blank" rel="noopener">Roadmap '+extIcon+'</a>';
+      var rows = i.resources.map(function(r){
+        return '<div class="modal-resrow" data-init="'+i.key+'" data-res="'+esc(r.name)+'">'
+          + '<div class="mrr-top"><span class="mrr-name">'+esc(r.name)+'</span><span class="mrr-date">'+esc(r.date)+'</span></div>'
+          + '<div class="mrr-tags">'+tagHTML(r.types)+' <span class="'+stageCls(r.stage)+'" style="font-family:var(--font-mono);font-size:.7rem;">'+esc(r.stage)+'</span></div>'
+          + '<div class="mrr-desc">'+esc(r.desc)+'</div></div>';
+      }).join("");
+      mContent.innerHTML = '<div class="modal-head"><img src="'+i.logo+'" alt="'+esc(i.name)+'"></div>'
+        + '<div class="modal-eyebrow">'+esc(i.type)+' · '+esc(i.geo)+'</div>'
+        + '<h2>'+esc(i.name)+'</h2>'
+        + '<p class="modal-meta">'+esc(i.blurb)+'</p>'
+        + '<p class="modal-meta"><strong>Scope:</strong> '+esc(i.scope)+'<br><strong>Liaison:</strong> '+liaison+'</p>'
+        + '<div class="modal-links">'+links+'</div>'
+        + '<div class="modal-reslist"><div class="modal-eyebrow" style="margin-bottom:8px;">'+i.resources.length+' resources</div>'+rows+'</div>';
+      overlay.classList.add("open");
+    }
+
+    function openResModal(key, name){
+      var i = byKey(key); if(!i) return;
+      var r = i.resources.filter(function(x){ return x.name===name; })[0]; if(!r) return;
+      mContent.innerHTML = '<div class="modal-head"><img src="'+i.logo+'" alt="'+esc(i.name)+'"></div>'
+        + '<div class="modal-eyebrow">'+esc(i.name)+'</div>'
+        + '<h2>'+esc(r.name)+'</h2>'
+        + '<div class="res-tags" style="margin-bottom:12px;">'+tagHTML(r.types)+'</div>'
+        + '<p class="modal-meta">'+esc(r.desc)+'</p>'
+        + '<p class="modal-meta"><strong>Stage:</strong> <span class="'+stageCls(r.stage)+'" style="font-family:var(--font-mono);">'+esc(r.stage)+'</span> &nbsp; <strong>Date:</strong> '+esc(r.date)+'</p>'
+        + '<div class="modal-links"><a class="btn btn-primary" href="'+r.url+'" target="_blank" rel="noopener">Open resource '+extIcon+'</a>'
+        + '<button class="btn btn-secondary" id="backToInit" data-init="'+i.key+'">All '+esc(i.short)+' resources</button></div>';
+      overlay.classList.add("open");
+    }
+    function closeModal(){ overlay.classList.remove("open"); }
+
+    // ---- events ----
+    document.getElementById("ecoSearch").addEventListener("input", function(e){ state.q = e.target.value.trim().toLowerCase(); render(); });
+    typeFilters.addEventListener("click", function(e){ var b = e.target.closest("button[data-type]"); if(!b) return; state.type = b.getAttribute("data-type"); renderTypeFilters(); render(); });
+    document.body.addEventListener("click", function(e){
+      var va = e.target.closest(".band-viewall"); if(va){ openInitModal(va.getAttribute("data-init")); return; }
+      var rc = e.target.closest(".res-card"); if(rc){ openResModal(rc.getAttribute("data-init"), rc.getAttribute("data-res")); return; }
+      var rr = e.target.closest(".modal-resrow"); if(rr){ openResModal(rr.getAttribute("data-init"), rr.getAttribute("data-res")); return; }
+      var bi = e.target.closest("#backToInit"); if(bi){ openInitModal(bi.getAttribute("data-init")); return; }
+    });
+    document.getElementById("modalClose").addEventListener("click", closeModal);
+    overlay.addEventListener("click", function(e){ if(e.target===overlay) closeModal(); });
+    document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModal(); });
+
+    renderTypeFilters();
+    render();
+  })();
+  </script>
+  <script src="assets/gh-stars.js"></script>
+</body>
+</html>
